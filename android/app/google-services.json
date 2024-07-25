@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "185980608180",
+    "project_id": "kafundisha-71a98",
+    "storage_bucket": "kafundisha-71a98.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:185980608180:android:25182fa5515e8e33ec41e1",
+        "android_client_info": {
+          "package_name": "com.devkanyanta.kafundisha"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlnx9bK49oFO7_UTqvIkj01njDynmpXWM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

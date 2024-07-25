@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kafundisha/colors.dart';
+import 'package:kafundisha/utils/firebase.dart';
 import 'package:kafundisha/views/sign_up.dart';
 import 'package:kafundisha/views/home.dart';
 
@@ -13,6 +14,8 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   bool rememberMe = false;
   final _formKey = GlobalKey<FormState>();
+  TextEditingController emailField = TextEditingController();
+  TextEditingController passwordField = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +57,7 @@ class _SignInState extends State<SignIn> {
                     child: Column(
                       children: [
                         TextFormField(
+                          controller: emailField,
                           decoration: InputDecoration(
                             labelText: 'email',
                             labelStyle: TextStyle(
@@ -74,6 +78,7 @@ class _SignInState extends State<SignIn> {
                         ),
                         const SizedBox(height: 16.0),
                         TextFormField(
+                          controller: passwordField,
                           obscureText: true,
                           decoration: InputDecoration(
                             labelText: 'password',
@@ -128,14 +133,26 @@ class _SignInState extends State<SignIn> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(const SnackBar(content: Text('Processing Data')));
-
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => HomeScreen()),
-                        );
+                        Firebase().SignIn(
+                            emailField.text,
+                            passwordField.text
+                        ).then((value){
+                          if (value.uid != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Sign in successful'))
+                            );
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) => HomeScreen(uid: value.uid.toString(),)));
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Sign in failed ${value.message}'))
+                            );
+                          }
+                        }).catchError((error) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('An error occurred: $error'))
+                          );
+                        });
                       }
                     },
                     style: ElevatedButton.styleFrom(

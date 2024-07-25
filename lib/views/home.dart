@@ -6,6 +6,9 @@ import 'package:kafundisha/views/profile.dart';
 import 'package:kafundisha/views/progress.dart';
 
 class HomeScreen extends StatefulWidget {
+  final String uid;
+
+  const HomeScreen({super.key, required this.uid});
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -13,11 +16,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  static List<Widget> _widgetOptions = <Widget>[
-    Home(),
+  static final List<Widget> _widgetOptions = <Widget>[
+    const Home(),
     CourseContentScreen(),
-    ProgressScreen(),
-    ProfileScreen(),
+    const ProgressScreen(),
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {

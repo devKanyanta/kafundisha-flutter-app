@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kafundisha/colors.dart';
+import 'package:kafundisha/utils/firebase.dart';
+import 'package:kafundisha/views/home.dart';
+import 'package:kafundisha/views/home_screen.dart';
 import 'package:kafundisha/views/sign_in.dart';
 
 class SignUp extends StatefulWidget {
@@ -13,6 +16,9 @@ class SignUp extends StatefulWidget {
 class _SignUpState extends State<SignUp> {
   final _formKey = GlobalKey<FormState>();
   bool rememberMe = false;
+  TextEditingController nameField = TextEditingController();
+  TextEditingController emailField = TextEditingController();
+  TextEditingController passwordField = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +60,7 @@ class _SignUpState extends State<SignUp> {
                     child: Column(
                       children: [
                         TextFormField(
+                          controller: nameField,
                           decoration:  InputDecoration(
                             labelText: 'full name',
                             labelStyle: TextStyle(
@@ -72,6 +79,7 @@ class _SignUpState extends State<SignUp> {
                         ),
                         const SizedBox(height: 16.0),
                         TextFormField(
+                          controller: emailField,
                           decoration: InputDecoration(
                             labelText: 'email',
                             labelStyle: TextStyle(
@@ -92,6 +100,7 @@ class _SignUpState extends State<SignUp> {
                         ),
                         const SizedBox(height: 16.0),
                         TextFormField(
+                          controller: passwordField,
                           obscureText: true,
                           decoration: InputDecoration(
                             labelText: 'password',
@@ -169,10 +178,27 @@ class _SignUpState extends State<SignUp> {
                 const SizedBox(height: 16),
                 GestureDetector(
                   onTap: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const SignIn()),
-                    );
+                    Firebase().SignUpUser(
+                      emailField.text,
+                      passwordField.text,
+                      nameField.text
+                    ).then((value){
+                      if (value.uid != null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Sign up successful'))
+                        );
+                        Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => HomeScreen(uid: value.uid.toString(),)));
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Sign up successful ${value.message}'))
+                        );
+                      }
+                    }).catchError((error) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('An error occurred: $error'))
+                      );
+                    });
                   },
                   child: Align(
                     alignment: Alignment.center,
