@@ -3,6 +3,7 @@ import 'package:kafundisha/colors.dart';
 import 'package:kafundisha/utils/firebase.dart';
 import 'package:kafundisha/views/sign_up.dart';
 import 'package:kafundisha/views/home.dart';
+import 'package:loading_btn/loading_btn.dart';
 
 class SignIn extends StatefulWidget {
   const SignIn({super.key});
@@ -130,13 +131,37 @@ class _SignInState extends State<SignIn> {
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                   width: double.maxFinite,
                   height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {
+                  child: LoadingBtn(
+                    height: 48,
+                    borderRadius: 12,
+                    animate: true,
+                    color: Colors.orange,
+                    width: 200,
+                    loader: Container(
+                      padding: const EdgeInsets.all(10),
+                      width: 40,
+                      height: 40,
+                      child: const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    ),
+                    child: const Text(
+                      "Sign Up",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16
+                      ),
+                    ),
+                    onTap: (startLoading, stopLoading, btnState) async {
                       if (_formKey.currentState!.validate()) {
-                        Firebase().SignIn(
+                        startLoading();
+                        try {
+                          var value = await FirebaseFunctions().signIn(
                             emailField.text,
-                            passwordField.text
-                        ).then((value){
+                            passwordField.text,
+                            context
+                          );
+                          stopLoading();
                           if (value.uid != null) {
                             ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Sign in successful'))
@@ -148,27 +173,14 @@ class _SignInState extends State<SignIn> {
                                 SnackBar(content: Text('Sign in failed ${value.message}'))
                             );
                           }
-                        }).catchError((error) {
+                        } catch (error) {
+                          stopLoading();
                           ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('An error occurred: $error'))
                           );
-                        });
+                        }
                       }
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange, // Button color
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0), // Reduced border radius
-                      ),
-                      minimumSize: const Size(double.infinity, 48), // Button width set to max width
-                    ),
-                    child: const Text(
-                      'Sign Up',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16
-                      ),
-                    ),
                   ),
                 ),
                 const SizedBox(height: 16),

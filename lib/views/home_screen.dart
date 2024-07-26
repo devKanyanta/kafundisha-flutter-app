@@ -1,6 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kafundisha/colors.dart';
+import 'package:kafundisha/modalViews/course_search.dart';
+import 'package:kafundisha/models/student.dart';
+import 'package:kafundisha/provider/student.dart';
 import 'package:kafundisha/views/topics.dart';
+import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -58,17 +63,30 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+
+    Student? student = Provider.of<StudentProvider>(context).student;
+
+    if (student == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text('No student data available'),
+        ),
+      );
+    }
+
+    List<String> splitName = student.name.split(' ');
+
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8.0),
             child: CircleAvatar(
-              backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+              backgroundImage: NetworkImage(student!.profileUrl),
             ),
           ),
         ],
@@ -98,9 +116,9 @@ class _HomeState extends State<Home> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Welcome Mapalo',
-                                style: TextStyle(
+                              Text(
+                                'Welcome ${splitName[0] ?? ' '}',
+                                style: const TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white),
@@ -111,30 +129,52 @@ class _HomeState extends State<Home> {
                                     fontSize: 18, color: Colors.white),
                               ),
                               const SizedBox(height: 16),
-                              TextField(
-                                style: const TextStyle(color: Colors.white),
-                                decoration: InputDecoration(
-                                  hintText: 'Search courses',
-                                  hintStyle: const TextStyle(color: Colors.grey),
-                                  prefixIcon: const Icon(
-                                    Icons.search,
-                                    color: Colors.grey,
-                                  ),
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      borderSide: const BorderSide(width: 2.0)),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: const BorderSide(
-                                      color: Colors.blue,
-                                      width: 2.0, // Set the border thickness when focused
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    borderSide: const BorderSide(
+                              GestureDetector(
+                                onTap: (){
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                      shape: const RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.vertical(top: Radius.circular(12.0)),
+                                      ),
+                                    builder: (BuildContext context){
+                                      return SearchModal();
+                                    }
+                                  );
+                                },
+                                child: TextField(
+                                  style: const TextStyle(color: Colors.white),
+                                  enabled: false,
+                                  decoration: InputDecoration(
+                                    hintText: 'Search courses',
+                                    hintStyle: const TextStyle(color: Colors.grey),
+                                    prefixIcon: const Icon(
+                                      Icons.search,
                                       color: Colors.grey,
-                                      width: 2.0, // Set the border thickness when enabled
+                                    ),
+                                    border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8.0),
+                                        borderSide: const BorderSide(width: 2.0)),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      borderSide: const BorderSide(
+                                        color: Colors.blue,
+                                        width: 2.0, // Set the border thickness when focused
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      borderSide: const BorderSide(
+                                        color: Colors.grey,
+                                        width: 2.0, // Set the border thickness when enabled
+                                      ),
+                                    ),
+                                    disabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      borderSide: const BorderSide(
+                                        color: Colors.grey,
+                                        width: 2.0, // Set the border thickness when enabled
+                                      ),
                                     ),
                                   ),
                                 ),

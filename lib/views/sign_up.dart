@@ -5,6 +5,7 @@ import 'package:kafundisha/utils/firebase.dart';
 import 'package:kafundisha/views/home.dart';
 import 'package:kafundisha/views/home_screen.dart';
 import 'package:kafundisha/views/sign_in.dart';
+import 'package:loading_btn/loading_btn.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -152,53 +153,64 @@ class _SignUpState extends State<SignUp> {
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                   width: double.maxFinite,
                   height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(const SnackBar(content: Text('Processing Data')));
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange, // Button color
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0), // Reduced border radius
+                  child: LoadingBtn(
+                    height: 48,
+                    borderRadius: 12,
+                    animate: true,
+                    color: Colors.orange,
+                    width: 200,
+                    loader: Container(
+                      padding: const EdgeInsets.all(10),
+                      width: 40,
+                      height: 40,
+                      child: const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
-                      minimumSize: const Size(double.infinity, 48), // Button width set to max width
                     ),
                     child: const Text(
-                        'Sign Up',
+                        "Sign Up",
                       style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16
+                          color: Colors.white,
+                          fontSize: 16
                       ),
                     ),
+                    onTap: (startLoading, stopLoading, btnState) async {
+                      if (_formKey.currentState!.validate()) {
+                        startLoading();
+                        try {
+                          var value = await FirebaseFunctions().signUpUser(
+                            emailField.text,
+                            passwordField.text,
+                            nameField.text,
+                            context
+                          );
+                          stopLoading();
+                          if (value.uid != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Sign up successful'))
+                            );
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) => HomeScreen(uid: value.uid.toString(),)));
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Sign up failed ${value.message}'))
+                            );
+                          }
+                        } catch (error) {
+                          stopLoading();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('An error occurred: $error'))
+                          );
+                        }
+                      }
+                    },
                   ),
                 ),
                 const SizedBox(height: 16),
                 GestureDetector(
                   onTap: (){
-                    Firebase().SignUpUser(
-                      emailField.text,
-                      passwordField.text,
-                      nameField.text
-                    ).then((value){
-                      if (value.uid != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Sign up successful'))
-                        );
-                        Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => HomeScreen(uid: value.uid.toString(),)));
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Sign up successful ${value.message}'))
-                        );
-                      }
-                    }).catchError((error) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('An error occurred: $error'))
-                      );
-                    });
+                    Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => const SignIn()));
                   },
                   child: Align(
                     alignment: Alignment.center,
