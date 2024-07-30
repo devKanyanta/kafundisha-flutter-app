@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:kafundisha/provider/course.dart';
 import 'package:kafundisha/provider/student.dart';
 import 'package:kafundisha/utils/firebase.dart';
 import 'package:kafundisha/views/home.dart';
@@ -12,6 +13,7 @@ void main() async{
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => CourseProvider()),
         ChangeNotifierProvider(create: (_) => StudentProvider()),
       ],
       child: MyApp(),
@@ -23,7 +25,8 @@ class MyApp extends StatelessWidget {
   MyApp({super.key});
 
   String? uid;
-
+  bool loading = true;
+  
   Future<void> fetchUserId() async {
     uid = await FirebaseFunctions().getUserId();
   }
@@ -47,8 +50,12 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         debugShowCheckedModeBanner: false,
-        home: const SignUp(),
-      );;
+        home: loading ? const Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ) : const SignUp(),
+      );
     }
   }
 }

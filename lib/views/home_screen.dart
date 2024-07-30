@@ -1,9 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kafundisha/colors.dart';
 import 'package:kafundisha/modalViews/course_search.dart';
 import 'package:kafundisha/models/student.dart';
+import 'package:kafundisha/provider/course.dart';
 import 'package:kafundisha/provider/student.dart';
+import 'package:kafundisha/utils/firebase.dart';
 import 'package:kafundisha/views/topics.dart';
 import 'package:provider/provider.dart';
 
@@ -15,55 +19,16 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  late Future<void> _coursesFuture;
 
-  final List<Map<String, dynamic>> courses = [
-    {
-      "title": "Mathematics",
-      "topics": "10 topics",
-      "description": "Different levels e.g high school & college math",
-      "rating": 4.5,
-    },
-    {
-      "title": "Physics",
-      "topics": "10 topics",
-      "description": "Different levels e.g high school & college math",
-      "rating": 4.5,
-    },
-    {
-      "title": "Mathematics",
-      "topics": "10 topics",
-      "description": "Different levels e.g high school & college math",
-      "rating": 4.5,
-    },
-  ];
-
-  final List<Map<String, dynamic>> dummyTopics = [
-    {
-      "title": "Introduction to Mathematics",
-      "description": "An introduction to basic mathematical concepts.",
-    },
-    {
-      "title": "Advanced Algebra",
-      "description": "A deep dive into advanced algebraic techniques.",
-    },
-    {
-      "title": "Geometry",
-      "description": "Understanding shapes, sizes, and the properties of space.",
-    },
-    {
-      "title": "Calculus",
-      "description": "An exploration of limits, derivatives, and integrals.",
-    },
-    {
-      "title": "Statistics",
-      "description": "Analyzing data, probability, and statistical methods.",
-    },
-  ];
-
+  @override
+  void initState() {
+    super.initState();
+    _coursesFuture = Provider.of<CourseProvider>(context, listen: false).loadCourses();
+  }
 
   @override
   Widget build(BuildContext context) {
-
     Student? student = Provider.of<StudentProvider>(context).student;
 
     if (student == null) {
@@ -86,7 +51,7 @@ class _HomeState extends State<Home> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: CircleAvatar(
-              backgroundImage: NetworkImage(student!.profileUrl),
+              backgroundImage: NetworkImage(student.profileUrl),
             ),
           ),
         ],
@@ -130,16 +95,16 @@ class _HomeState extends State<Home> {
                               ),
                               const SizedBox(height: 16),
                               GestureDetector(
-                                onTap: (){
+                                onTap: () {
                                   showModalBottomSheet(
                                     context: context,
                                     isScrollControlled: true,
-                                      shape: const RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.vertical(top: Radius.circular(12.0)),
-                                      ),
-                                    builder: (BuildContext context){
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.vertical(top: Radius.circular(12.0)),
+                                    ),
+                                    builder: (BuildContext context) {
                                       return SearchModal();
-                                    }
+                                    },
                                   );
                                 },
                                 child: TextField(
@@ -153,27 +118,28 @@ class _HomeState extends State<Home> {
                                       color: Colors.grey,
                                     ),
                                     border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8.0),
-                                        borderSide: const BorderSide(width: 2.0)),
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      borderSide: const BorderSide(width: 2.0),
+                                    ),
                                     focusedBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8.0),
                                       borderSide: const BorderSide(
                                         color: Colors.blue,
-                                        width: 2.0, // Set the border thickness when focused
+                                        width: 2.0,
                                       ),
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8.0),
                                       borderSide: const BorderSide(
                                         color: Colors.grey,
-                                        width: 2.0, // Set the border thickness when enabled
+                                        width: 2.0,
                                       ),
                                     ),
                                     disabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8.0),
                                       borderSide: const BorderSide(
                                         color: Colors.grey,
-                                        width: 2.0, // Set the border thickness when enabled
+                                        width: 2.0,
                                       ),
                                     ),
                                   ),
@@ -210,85 +176,99 @@ class _HomeState extends State<Home> {
               ),
             ),
             const SizedBox(height: 4),
-            ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: courses.length,
-              itemBuilder: (context, index) {
-                final course = courses[index];
-                return Padding(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: Card(
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              course['title'],
-                              style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              course['topics'],
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                            Text(
-                              course['description'],
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: const BoxDecoration(
-                                  borderRadius:
-                                  BorderRadius.all(Radius.circular(12)),
-                                  color: AppColors.lightBackground),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.star_half_sharp,
-                                    color: AppColors.orange,
-                                    size: 16,
-                                  ),
-                                  Text(
-                                    course['rating'].toString(),
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                  const Spacer(),
-                                  GestureDetector(
-                                    onTap: (){
-                                      Navigator.push(context,
-                                      MaterialPageRoute(builder: (context)=>TopicsScreen(topics: dummyTopics)));
-                                    },
-                                    child: const Row(
-                                      children: [
-                                        Text(
-                                          'Open Course',
-                                          style: TextStyle(fontSize: 12),
-                                        ),
-                                        Icon(
-                                          Icons.double_arrow_sharp,
-                                          size: 16,
-                                        )
-                                      ],
-                                    ),
-                                  )
-                                ],
+            FutureBuilder(
+              future: _coursesFuture,
+              builder: (ctx, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('An error occurred!'));
+                } else {
+                  return Consumer<CourseProvider>(
+                    builder: (ctx, courseProvider, child) {
+                      var courses = courseProvider.courses;
+                      return ListView.builder(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: courses.length,
+                        itemBuilder: (context, index) {
+                          final course = courses[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            child: Card(
+                              color: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                            )
-                          ],
-                        ),
-                      )),
-                );
+                              elevation: 4,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      course.name,
+                                      style: const TextStyle(
+                                          fontSize: 18, fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      course.description,
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: const BoxDecoration(
+                                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                                        color: AppColors.lightBackground,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.star_half_sharp,
+                                            color: AppColors.orange,
+                                            size: 16,
+                                          ),
+                                          Text(
+                                            course.rating.toString(),
+                                            style: const TextStyle(fontSize: 12),
+                                          ),
+                                          const Spacer(),
+                                          GestureDetector(
+                                            onTap: () async {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => TopicsScreen(courseId: course.id), // Pass the course ID
+                                                ),
+                                              );
+                                            },
+                                            child: const Row(
+                                              children: [
+                                                Text(
+                                                  'Open Course',
+                                                  style: TextStyle(fontSize: 12),
+                                                ),
+                                                Icon(
+                                                  Icons.double_arrow_sharp,
+                                                  size: 16,
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  );
+                }
               },
             ),
           ],
@@ -303,8 +283,7 @@ Widget _buildCategoryButton(String label, IconData icon) {
     children: [
       Icon(icon, size: 38, color: Colors.white),
       const SizedBox(height: 8),
-      Text(label,
-          style: const TextStyle(fontSize: 14, color: Colors.white)),
+      Text(label, style: const TextStyle(fontSize: 14, color: Colors.white)),
     ],
   );
 }

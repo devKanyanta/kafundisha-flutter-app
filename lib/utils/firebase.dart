@@ -1,9 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:kafundisha/models/course.dart';
+import 'package:kafundisha/models/lesson.dart';
 import 'package:kafundisha/models/signInUp.dart';
 import 'package:kafundisha/models/student.dart';
+import 'package:kafundisha/models/subtopic.dart';
+import 'package:kafundisha/models/topic.dart';
 import 'package:kafundisha/provider/student.dart';
+import 'package:kafundisha/provider/course.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -34,15 +39,24 @@ class FirebaseFunctions {
 
     try {
       UserCredential userCredential =
-      await auth.createUserWithEmailAndPassword(email: email, password: password);
+      await auth.createUserWithEmailAndPassword(
+          email: email, password: password);
       uid = userCredential.user?.uid;
       message = 'Sign up successful';
       prefs.setString("uid", uid.toString());
-      await addStudentData(uid!, name, email, courses, 0, '', 'https://ui-avatars.com/api/?name=$name');
+      await addStudentData(uid!, name, email, courses, 0, '',
+          'https://ui-avatars.com/api/?name=$name');
 
-      Student student = Student(uid: uid, name: name, email: email, courses: courses, age: 0, gender: '', profileUrl: 'https://ui-avatars.com/api/?name=$name', createdAt: DateTime.now());
+      Student student = Student(
+          uid: uid,
+          name: name,
+          email: email,
+          courses: courses,
+          age: 0,
+          gender: '',
+          profileUrl: 'https://ui-avatars.com/api/?name=$name',
+          createdAt: DateTime.now());
       Provider.of<StudentProvider>(context, listen: false).setStudent(student);
-
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
         case 'weak-password':
@@ -81,7 +95,6 @@ class FirebaseFunctions {
       if (student != null) {
         Provider.of<StudentProvider>(context, listen: false).setStudent(student);
       }
-
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         message = 'Please check your credentials';
@@ -93,7 +106,8 @@ class FirebaseFunctions {
     return SignUpResult(message, uid);
   }
 
-  Future<void> addStudentData(String uid, String name, String email, List<String> courses, int age, String gender, String profileUrl) async {
+  Future<void> addStudentData(String uid, String name, String email,
+      List<String> courses, int age, String gender, String profileUrl) async {
     try {
       await firestore.collection('students').doc(uid).set({
         'name': name,
@@ -124,6 +138,57 @@ class FirebaseFunctions {
     } catch (e) {
       print('Failed to retrieve user data: $e');
       return null;
+    }
+  }
+
+  Future<List<Course>> fetchCourses() async {
+    try {
+      QuerySnapshot querySnapshot = await firestore.collection('courses').get();
+      return querySnapshot.docs.map((doc) {
+        return Course.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+      }).toList();
+    } catch (e) {
+      print("Error fetching courses: $e");
+      return [];
+    }
+  }
+
+  Future<List<Topic>> fetchTopics(String courseId) async {
+    try {
+      QuerySnapshot querySnapshot = await firestore.collection('topics')
+          .where('course_id', isEqualTo: courseId).get();
+      return querySnapshot.docs.map((doc) {
+        return Topic.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+      }).toList();
+    } catch (e) {
+      print("Error fetching topics: $e");
+      return [];
+    }
+  }
+
+  Future<List<Subtopic>> fetchSubtopics(String topicId) async {
+    try {
+      QuerySnapshot querySnapshot = await firestore.collection('subtopics')
+          .where('topic_id', isEqualTo: topicId).get();
+      return querySnapshot.docs.map((doc) {
+        return Subtopic.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+      }).toList();
+    } catch (e) {
+      print("Error fetching subtopics: $e");
+      return [];
+    }
+  }
+
+  Future<List<Lesson>> fetchLessons(String subtopicId) async {
+    try {
+      QuerySnapshot querySnapshot = await firestore.collection('lessons')
+          .where('subtopic_id', isEqualTo: subtopicId).get();
+      return querySnapshot.docs.map((doc) {
+        return Lesson.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+      }).toList();
+    } catch (e) {
+      print("Error fetching lessons: $e");
+      return [];
     }
   }
 }

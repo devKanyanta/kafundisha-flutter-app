@@ -132,7 +132,7 @@ class CourseContentScreen extends StatelessWidget {
                             const Spacer(),
                             GestureDetector(
                               onTap: (){
-                                Navigator.push(context, MaterialPageRoute(builder: (context)=>TopicsScreen(topics: dummyTopics)));
+                                // Navigator.push(context, MaterialPageRoute(builder: (context)=>TopicsScreen(topics: dummyTopics)));
                               },
                               child: const Row(
                                 children: [
