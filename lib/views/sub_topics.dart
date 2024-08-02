@@ -1,45 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:kafundisha/colors.dart';
-import 'package:kafundisha/models/topic.dart';
+import 'package:kafundisha/models/subtopic.dart';
 import 'package:kafundisha/utils/firebase.dart';
-import 'package:kafundisha/views/sub_topics.dart';
+import 'package:kafundisha/views/lesson.dart';
 
-class TopicsScreen extends StatefulWidget {
-  final String courseId; // Course ID to fetch topics
+class SubTopicsScreen extends StatefulWidget {
+  final String topicId;
 
-  const TopicsScreen({Key? key, required this.courseId}) : super(key: key);
+  const SubTopicsScreen({Key? key, required this.topicId}) : super(key: key);
 
   @override
-  _TopicsScreenState createState() => _TopicsScreenState();
+  _SubTopicsScreenState createState() => _SubTopicsScreenState();
 }
 
-class _TopicsScreenState extends State<TopicsScreen> {
-  late Future<List<Topic>> _topicsFuture;
+class _SubTopicsScreenState extends State<SubTopicsScreen> {
+  late Future<List<Subtopic>> _topicsFuture;
 
   @override
   void initState() {
     super.initState();
-    _topicsFuture = FirebaseFunctions().fetchTopics(widget.courseId);
+    _topicsFuture = FirebaseFunctions().fetchSubtopics(widget.topicId);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: const Text(
+          'Sub Topics',
+          style: TextStyle(
+              color: Colors.white,
+              fontSize: 16
+          ),
+        ),
         leading: const Icon(
           Icons.arrow_back,
           color: Colors.white,
         ),
         backgroundColor: AppColors.darkBackground,
-        title: const Text(
-            'Topics',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16
-          ),
-        ),
       ),
-      body: FutureBuilder<List<Topic>>(
+      body: FutureBuilder<List<Subtopic>>(
         future: _topicsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -47,7 +47,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No topics available'));
+            return const Center(child: Text('No subtopics available'));
           } else {
             final topics = snapshot.data!;
             return ListView.builder(
@@ -56,7 +56,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
                 return GestureDetector(
                   onTap: (){
                     Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => SubTopicsScreen(topicId: topics[index].id,)));
+                    MaterialPageRoute(builder: (context)=> Lesson(subTopicId: topics[index].id,)));
                   },
                   child: ListTile(
                     title: Text(topics[index].name), // Ensure 'name' is a field in your Topic model

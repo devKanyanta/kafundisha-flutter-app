@@ -10,14 +10,14 @@ class CourseProvider with ChangeNotifier {
   List<Course> _courses = [];
   List<Topic> _topics = [];
   List<Subtopic> _subtopics = [];
-  List<Lesson> _lessons = [];
+  List<LessonModel> _lessons = [];
 
   final FirebaseFunctions _dataService = FirebaseFunctions();
 
   List<Course> get courses => _courses;
   List<Topic> get topics => _topics;
   List<Subtopic> get subtopics => _subtopics;
-  List<Lesson> get lessons => _lessons;
+  List<LessonModel> get lessons => _lessons;
 
   Future<void> loadCourses() async {
     _courses = await _dataService.fetchCourses();
@@ -108,17 +108,17 @@ class CourseProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setLessons(List<Lesson> lessons) {
+  void setLessons(List<LessonModel> lessons) {
     _lessons = lessons;
     notifyListeners();
   }
 
-  void addLesson(Lesson lesson) {
+  void addLesson(LessonModel lesson) {
     _lessons.add(lesson);
     notifyListeners();
   }
 
-  void updateLesson(Lesson updatedLesson) {
+  void updateLesson(LessonModel updatedLesson) {
     int index = _lessons.indexWhere((lesson) => lesson.id == updatedLesson.id);
     if (index != -1) {
       _lessons[index] = updatedLesson;

@@ -8,14 +8,22 @@ import 'package:kafundisha/models/student.dart';
 import 'package:kafundisha/models/subtopic.dart';
 import 'package:kafundisha/models/topic.dart';
 import 'package:kafundisha/provider/student.dart';
-import 'package:kafundisha/provider/course.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:audioplayers/audioplayers.dart';
 
 class FirebaseFunctions {
   final firestore = FirebaseFirestore.instance;
   final databaseRef = FirebaseDatabase.instance.ref();
+  final String apiKey = 'e67c9538ec8ffa6e46b90eea9bd06952';
+  final String apiUrl = 'https://api.elevenlabs.io/v1/text-to-speech/en_us_male/stream';
+  final String xiApiKey = 'e67c9538ec8ffa6e46b90eea9bd06952';
+  final String voiceId = '21m00Tcm4TlvDq8ikWAM';
+  final String ttsUrl = 'https://api.elevenlabs.io/v1/text-to-speech/<voice-id>/stream';
+  final player = AudioPlayer();
 
   Future<String?> getUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -179,16 +187,61 @@ class FirebaseFunctions {
     }
   }
 
-  Future<List<Lesson>> fetchLessons(String subtopicId) async {
+  Future<List<LessonModel>> fetchLessons(String subtopicId) async {
     try {
       QuerySnapshot querySnapshot = await firestore.collection('lessons')
           .where('subtopic_id', isEqualTo: subtopicId).get();
       return querySnapshot.docs.map((doc) {
-        return Lesson.fromMap(doc.data() as Map<String, dynamic>, doc.id);
+        return LessonModel.fromMap(doc.data() as Map<String, dynamic>, doc.id);
       }).toList();
     } catch (e) {
       print("Error fetching lessons: $e");
       return [];
+    }
+  }
+
+  String replaceNonLetters(String input) {
+    // Define regular expressions for common Markdown symbols
+    final regex = RegExp(r'(\*\*|__|[_*~`>#\[\]()\-\+]+|(?:\d+\.))');
+
+    // Replace matched Markdown symbols with an empty string
+    return input.replaceAll(regex, '');
+  }
+
+  Future<void> textToSpeech(String text) async {
+    String newText = replaceNonLetters(text);
+    String voiceRachel = 'BtWabtumIemAotTjP5sk'; // Ensure this voice ID is correct
+    String url = 'https://api.elevenlabs.io/v1/text-to-speech/$voiceRachel';
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Accept': 'audio/mpeg',
+          'xi-api-key': xiApiKey,
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'text': newText,
+          'model_id': 'eleven_monolingual_v1',
+          'voice_settings': {
+            'stability': 0.15,
+            'similarity_boost': 0.75,
+          },
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final audioBytes = response.bodyBytes;
+        final audioPlayer = AudioPlayer();
+        await audioPlayer.play(BytesSource(audioBytes));
+        print('Audio stream played successfully.');
+      } else {
+        print('Error: ${response.statusCode}');
+        print('Response body: ${response.body}');
+      }
+    } catch (e) {
+      print('Exception caught: $e');
     }
   }
 }

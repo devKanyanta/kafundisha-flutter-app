@@ -10,6 +10,7 @@ import 'views/sign_up.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  // Gemini.init(apiKey: 'AIzaSyDAzeuec2Hv9jjC47gRpl7pEcIqeu0xS0');
   runApp(
     MultiProvider(
       providers: [
