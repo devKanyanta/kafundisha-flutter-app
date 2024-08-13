@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:kafundisha/provider/course.dart';
 import 'package:kafundisha/provider/student.dart';
-import 'package:kafundisha/utils/firebase.dart';
+import 'package:kafundisha/utils/services.dart';
 import 'package:kafundisha/views/home.dart';
 import 'package:provider/provider.dart';
 import 'views/sign_up.dart';
@@ -22,28 +22,46 @@ void main() async{
   );
 }
 
-class MyApp extends StatelessWidget {
-  MyApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
 
-  String? uid;
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  String uid = '';
   bool loading = true;
-  
+
   Future<void> fetchUserId() async {
-    uid = await FirebaseFunctions().getUserId();
+    uid = await Services().getUserId();
   }
 
   @override
   Widget build(BuildContext context) {
-    fetchUserId();
-    if (uid!=null) {
+    fetchUserId().then((value){
+      setState(() {
+        loading = false;
+      });
+    });
+    if (uid.isNotEmpty) {
       return MaterialApp(
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      debugShowCheckedModeBanner: false,
-      home: HomeScreen(uid: uid!),
-    );
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        debugShowCheckedModeBanner: false,
+        home: HomeScreen(uid: uid!),
+      );
+    } else if(uid == '0'){
+      return MaterialApp(
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        debugShowCheckedModeBanner: false,
+        home: const SignUp(),
+      );
     } else {
       return MaterialApp(
         theme: ThemeData(
@@ -51,11 +69,11 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         debugShowCheckedModeBanner: false,
-        home: loading ? const Scaffold(
+        home: const Scaffold(
           body: Center(
             child: CircularProgressIndicator(),
           ),
-        ) : const SignUp(),
+        ),
       );
     }
   }

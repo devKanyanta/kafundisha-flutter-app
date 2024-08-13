@@ -1,28 +1,17 @@
 class Topic {
-  final String id;
-  final String name;
-  // Add other fields as necessary
+  String id;
+  String name;
+  int index;
+  String courseId;
 
-  Topic({required this.id, required this.name});
-
-  factory Topic.fromMap(Map<String, dynamic> data, String id) {
-    return Topic(
-      id: id,
-      name: data['name'] ?? '',
-      // Initialize other fields
-    );
-  }
+  Topic({required this.id, required this.name, required this.index, required this.courseId});
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'name': name,
-      // Add other fields
+      'title': name,
+      'index': index,
+      'courseId': courseId,
     };
-  }
-
-  @override
-  String toString() {
-    return 'Topic{id: $id, name: $name}';
   }
 }

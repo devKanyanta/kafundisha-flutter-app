@@ -4,7 +4,7 @@ import 'package:kafundisha/models/course.dart';
 import 'package:kafundisha/models/topic.dart';
 import 'package:kafundisha/models/subtopic.dart';
 import 'package:kafundisha/models/lesson.dart';
-import 'package:kafundisha/utils/firebase.dart';
+import 'package:kafundisha/utils/services.dart';
 
 class CourseProvider with ChangeNotifier {
   List<Course> _courses = [];
@@ -12,7 +12,7 @@ class CourseProvider with ChangeNotifier {
   List<Subtopic> _subtopics = [];
   List<LessonModel> _lessons = [];
 
-  final FirebaseFunctions _dataService = FirebaseFunctions();
+  final Services _dataService = Services();
 
   List<Course> get courses => _courses;
   List<Topic> get topics => _topics;

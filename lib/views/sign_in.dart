@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kafundisha/colors.dart';
-import 'package:kafundisha/utils/firebase.dart';
+import 'package:kafundisha/utils/services.dart';
 import 'package:kafundisha/views/sign_up.dart';
 import 'package:kafundisha/views/home.dart';
 import 'package:loading_btn/loading_btn.dart';
@@ -156,7 +156,7 @@ class _SignInState extends State<SignIn> {
                       if (_formKey.currentState!.validate()) {
                         startLoading();
                         try {
-                          var value = await FirebaseFunctions().signIn(
+                          var value = await Services().signIn(
                             emailField.text,
                             passwordField.text,
                             context

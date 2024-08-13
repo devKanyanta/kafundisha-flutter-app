@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kafundisha/colors.dart';
 import 'package:kafundisha/models/subtopic.dart';
-import 'package:kafundisha/utils/firebase.dart';
+import 'package:kafundisha/utils/services.dart';
 import 'package:kafundisha/views/lesson.dart';
 
 class SubTopicsScreen extends StatefulWidget {
@@ -19,7 +19,7 @@ class _SubTopicsScreenState extends State<SubTopicsScreen> {
   @override
   void initState() {
     super.initState();
-    _topicsFuture = FirebaseFunctions().fetchSubtopics(widget.topicId);
+    _topicsFuture = Services().fetchSubtopics(widget.topicId);
   }
 
   @override

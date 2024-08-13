@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kafundisha/colors.dart';
 import 'package:kafundisha/models/topic.dart';
-import 'package:kafundisha/utils/firebase.dart';
+import 'package:kafundisha/utils/services.dart';
 import 'package:kafundisha/views/sub_topics.dart';
 
 class TopicsScreen extends StatefulWidget {
@@ -19,7 +19,7 @@ class _TopicsScreenState extends State<TopicsScreen> {
   @override
   void initState() {
     super.initState();
-    _topicsFuture = FirebaseFunctions().fetchTopics(widget.courseId);
+    _topicsFuture = Services().fetchTopics(widget.courseId);
   }
 
   @override
@@ -41,15 +41,15 @@ class _TopicsScreenState extends State<TopicsScreen> {
       ),
       body: FutureBuilder<List<Topic>>(
         future: _topicsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+        builder: (context, Services) {
+          if (Services.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          } else if (Services.hasError) {
+            return Center(child: Text('Error: ${Services.error}'));
+          } else if (!Services.hasData || Services.data!.isEmpty) {
             return const Center(child: Text('No topics available'));
           } else {
-            final topics = snapshot.data!;
+            final topics = Services.data!;
             return ListView.builder(
               itemCount: topics.length,
               itemBuilder: (context, index) {

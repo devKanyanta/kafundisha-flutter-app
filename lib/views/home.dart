@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kafundisha/colors.dart';
 import 'package:kafundisha/models/student.dart';
-import 'package:kafundisha/utils/firebase.dart';
+import 'package:kafundisha/utils/services.dart';
 import 'package:kafundisha/views/courses.dart';
 import 'package:kafundisha/views/home_screen.dart';
 import 'package:kafundisha/views/profile.dart';
@@ -29,8 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _initializeStudentData() async {
-    final firebaseService = FirebaseFunctions();
-    Student? student = await firebaseService.getUserData(widget.uid);
+    final services = Services();
+    Student? student = await services.getUserData(widget.uid);
     if (student != null) {
       Provider.of<StudentProvider>(context, listen: false).setStudent(student);
     }
@@ -39,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
   static final List<Widget> _widgetOptions = <Widget>[
     const Home(),
     CourseContentScreen(),
-    const ProgressScreen(),
+    // const ProgressScreen(),
     const ProfileScreen(),
   ];
 
@@ -54,46 +54,38 @@ class _HomeScreenState extends State<HomeScreen> {
     return FutureBuilder(
       future: _fetchStudentData,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
-          );
-        } else {
-          return Scaffold(
+        return Scaffold(
+          backgroundColor: AppColors.lightBackground,
+          body: IndexedStack(
+            index: _selectedIndex,
+            children: _widgetOptions,
+          ),
+          bottomNavigationBar: BottomNavigationBar(
             backgroundColor: AppColors.lightBackground,
-            body: IndexedStack(
-              index: _selectedIndex,
-              children: _widgetOptions,
-            ),
-            bottomNavigationBar: BottomNavigationBar(
-              backgroundColor: AppColors.lightBackground,
-              items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  label: 'Home',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.book),
-                  label: 'Courses',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.trending_up),
-                  label: 'Progress',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person),
-                  label: 'Profile',
-                ),
-              ],
-              currentIndex: _selectedIndex,
-              selectedItemColor: AppColors.orange,
-              unselectedItemColor: AppColors.darkBackground,
-              onTap: _onItemTapped,
-            ),
-          );
-        }
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.book),
+                label: 'Courses',
+              ),
+              // BottomNavigationBarItem(
+              //   icon: Icon(Icons.trending_up),
+              //   label: 'Progress',
+              // ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person),
+                label: 'Profile',
+              ),
+            ],
+            currentIndex: _selectedIndex,
+            selectedItemColor: AppColors.orange,
+            unselectedItemColor: AppColors.darkBackground,
+            onTap: _onItemTapped,
+          ),
+        );
       },
     );
   }

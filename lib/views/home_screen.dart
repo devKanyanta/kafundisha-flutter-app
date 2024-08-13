@@ -7,8 +7,9 @@ import 'package:kafundisha/modalViews/course_search.dart';
 import 'package:kafundisha/models/student.dart';
 import 'package:kafundisha/provider/course.dart';
 import 'package:kafundisha/provider/student.dart';
-import 'package:kafundisha/utils/firebase.dart';
+import 'package:kafundisha/utils/services.dart';
 import 'package:kafundisha/views/topics.dart';
+import 'package:kafundisha/widgets/basic_info.dart';
 import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
@@ -34,7 +35,7 @@ class _HomeState extends State<Home> {
     if (student == null) {
       return const Scaffold(
         body: Center(
-          child: Text('No student data available'),
+          child: CircularProgressIndicator(),
         ),
       );
     }
@@ -47,14 +48,36 @@ class _HomeState extends State<Home> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: CircleAvatar(
+        title: Row(
+          children: [
+            CircleAvatar(
               backgroundImage: NetworkImage(student.profileUrl),
             ),
-          ),
-        ],
+            const SizedBox(
+              width: 16,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  student.name,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: AppColors.darkBackground.withAlpha(180)
+                  ),
+                ),
+                Text(
+                  student.email,
+                  style: const TextStyle(
+                      fontSize: 16,
+                      color: AppColors.darkBackground
+                  ),
+                )
+              ],
+            )
+          ],
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -65,6 +88,7 @@ class _HomeState extends State<Home> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
+                    margin: const EdgeInsets.only(top: 16.0),
                     decoration: BoxDecoration(
                       color: AppColors.darkBackground.withAlpha(180),
                       borderRadius: const BorderRadius.all(Radius.circular(12)),
@@ -157,10 +181,30 @@ class _HomeState extends State<Home> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              _buildCategoryButton('Math', Icons.calculate),
-                              _buildCategoryButton('Science', Icons.science),
-                              _buildCategoryButton('Code', Icons.code),
-                              _buildCategoryButton('Social', Icons.people),
+                              GestureDetector(
+                                onTap:(){
+
+                                },
+                                  child: _buildCategoryButton('Math', Icons.calculate),
+                              ),
+                              GestureDetector(
+                                onTap:(){
+
+                                },
+                                child: _buildCategoryButton('Science', Icons.science),
+                              ),
+                              GestureDetector(
+                                onTap:(){
+
+                                },
+                                child: _buildCategoryButton('Code', Icons.code),
+                              ),
+                              GestureDetector(
+                                onTap:(){
+
+                                },
+                                child: _buildCategoryButton('Social', Icons.people),
+                              ),
                             ],
                           ),
                         )
@@ -229,10 +273,10 @@ class _HomeState extends State<Home> {
                                             color: AppColors.orange,
                                             size: 16,
                                           ),
-                                          Text(
-                                            course.rating.toString(),
-                                            style: const TextStyle(fontSize: 12),
-                                          ),
+                                          // Text(
+                                          //   course.rating.toString(),
+                                          //   style: const TextStyle(fontSize: 12),
+                                          // ),
                                           const Spacer(),
                                           GestureDetector(
                                             onTap: () async {
@@ -279,11 +323,15 @@ class _HomeState extends State<Home> {
 }
 
 Widget _buildCategoryButton(String label, IconData icon) {
-  return Column(
-    children: [
-      Icon(icon, size: 38, color: Colors.white),
-      const SizedBox(height: 8),
-      Text(label, style: const TextStyle(fontSize: 14, color: Colors.white)),
-    ],
+  return Ink(
+    child: InkWell(
+      child: Column(
+        children: [
+          Icon(icon, size: 38, color: Colors.white),
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontSize: 14, color: Colors.white)),
+        ],
+      ),
+    ),
   );
 }

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:kafundisha/models/course.dart';
+import 'package:kafundisha/utils/services.dart';
+import 'package:kafundisha/views/topics.dart';
 
 class SearchModal extends StatefulWidget {
   @override
@@ -6,15 +10,23 @@ class SearchModal extends StatefulWidget {
 }
 
 class _SearchModalState extends State<SearchModal> {
-  final TextEditingController _searchController = TextEditingController();
-  List<String> _results = [];
+  List<Course> _courses = [];
+  TextEditingController _controller = TextEditingController();
 
-  void _onSearchChanged(String query) {
-    // Simulate search results based on the query
-    setState(() {
-      _results = List.generate(10, (index) => '$query Result $index');
-    });
+  void _search(String query) async {
+    if (query.isEmpty) {
+      setState(() {
+        _courses = [];
+      });
+    } else {
+      List<Course> courses = await Services().searchCourses(query);
+      setState(() {
+        _courses = courses;
+      });
+    }
   }
+
+  bool isCourseEmpty = true;
 
   @override
   Widget build(BuildContext context) {
@@ -26,22 +38,50 @@ class _SearchModalState extends State<SearchModal> {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                labelText: 'Search',
-                border: OutlineInputBorder(),
+              controller: _controller,
+              decoration: const InputDecoration(
+
+                hintText: 'Search courses...',
               ),
-              onChanged: _onSearchChanged,
+              onChanged: (query) {
+                _search(query);
+                if(_courses.isNotEmpty) {
+                  isCourseEmpty = false;
+                } else{
+                  isCourseEmpty = true;
+                }
+                print(_courses);
+              },
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Expanded(
-              child: ListView.builder(
-                itemCount: _results.length,
+              child: !isCourseEmpty ? ListView.builder(
+                itemCount: _courses.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(_results[index]),
+                  return GestureDetector(
+                    onTap: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TopicsScreen(courseId: _courses[index].id),
+                        ),
+                      );
+                    },
+                    child: ListTile(
+                      title: Text(_courses[index].name),
+                    ),
                   );
                 },
+              ): const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Text(
+                    'Sorry, no courses found.',
+                    style: TextStyle(
+                      color: Colors.black
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

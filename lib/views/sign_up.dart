@@ -1,9 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kafundisha/colors.dart';
-import 'package:kafundisha/utils/firebase.dart';
+import 'package:kafundisha/utils/services.dart';
 import 'package:kafundisha/views/home.dart';
-import 'package:kafundisha/views/home_screen.dart';
 import 'package:kafundisha/views/sign_in.dart';
 import 'package:loading_btn/loading_btn.dart';
 
@@ -178,7 +177,7 @@ class _SignUpState extends State<SignUp> {
                       if (_formKey.currentState!.validate()) {
                         startLoading();
                         try {
-                          var value = await FirebaseFunctions().signUpUser(
+                          var value = await Services().signUpUser(
                             emailField.text,
                             passwordField.text,
                             nameField.text,

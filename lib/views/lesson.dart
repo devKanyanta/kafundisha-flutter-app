@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:kafundisha/models/lesson.dart';
-import 'package:kafundisha/utils/firebase.dart';
+import 'package:kafundisha/utils/services.dart';
 
 class Lesson extends StatefulWidget {
   final String subTopicId;
@@ -14,53 +14,55 @@ class Lesson extends StatefulWidget {
 
 class _LessonState extends State<Lesson> {
   String displayText = '';
-  final model = GenerativeModel(model: "gemini-1.5-flash", apiKey: 'AIzaSyDAzeuec2Hv9jjC47gRpl7pEcIqeu0xS0A');
   Future<List<LessonModel>>? futureLessons;
-  final FirebaseFunctions ttsService = FirebaseFunctions();
 
   @override
   void initState() {
     super.initState();
-    generateText();
-    futureLessons = FirebaseFunctions().fetchLessons(widget.subTopicId);
-  }
-
-  void generateText() async {
-    setState(() {
-      displayText = '';
+    Services().generateText(widget.subTopicId).then((value){
+      displayText = value;
     });
+    futureLessons = Services().fetchLessons(widget.subTopicId);
 
-    try {
-      List<LessonModel> lessons = await FirebaseFunctions().fetchLessons(widget.subTopicId);
-      String lessonTitles = lessons.map((lesson) => lesson.title).join(", ");
-
-      final response = await model.generateContent([
-        Content.text("Write an introduction for the following lessons: $lessonTitles"),
-      ]);
-
-      ttsService.textToSpeech(response.text.toString());
-
-      setState(() {
-        displayText = response.text.toString();
-      });
-    } catch (e) {
-      print("Error generating text: $e");
-      setState(() {
-        displayText = 'Error generating text';
-      });
-    }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Markdown(
-          data: displayText
-        ),
-      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: Markdown(
+              data: displayText,
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(12.0),
+            height: 70,
+            child: Row(
+              children: [
+                IconButton(
+                    onPressed: (){
+
+                },
+                  icon: const Icon(
+                      Icons.arrow_back_ios
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: (){
+
+                  },
+                  icon: const Icon(
+                      Icons.arrow_forward_ios
+                  ),
+                )
+              ],
+            ),
+          )
+        ],
+      )
     );
   }
 }
